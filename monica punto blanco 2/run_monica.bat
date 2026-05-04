@@ -1,0 +1,6 @@
+@echo off
+echo Iniciando el servidor de Monica...
+echo Abriendo navegador en http://localhost:8081...
+start http://localhost:8081
+python server.py
+pause

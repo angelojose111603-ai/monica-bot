@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mónica - Punto Blanco</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-light: #f5f6f8;
+            --card-bg: #ffffff;
+            --text-dark: #161616;
+            --text-accent: #c29b6f;
+            --text-light: #b0b0b0;
+            --danger-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .phone-container {
+            width: 380px;
+            height: 680px;
+            background-color: var(--card-bg);
+            border-radius: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 60px 30px 40px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05);
+        }
+
+        .top-section {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .logo-section {
+            height: 75px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-section img {
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .middle-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            position: relative;
+        }
+
+        /* VIEW CONTAINERS AND TRANSITIONS */
+        .view-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        .view-container.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+
+        /* AVATAR ELEMENTS */
+        .avatar-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .avatar-glow {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0) 70%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .avatar-ring {
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background-color: #f8f9fa;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06), inset 0 0 0 4px #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .avatar-inner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06), inset 0 0 0 4px #ffffff, 0 0 0 0 rgba(194, 155, 111, 0.3); }
+            70% { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06), inset 0 0 0 4px #ffffff, 0 0 0 20px rgba(194, 155, 111, 0); }
+            100% { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06), inset 0 0 0 4px #ffffff, 0 0 0 0 rgba(194, 155, 111, 0); }
+        }
+
+        @keyframes pulse-ring-listen {
+            0% { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06), inset 0 0 0 4px #ffffff, 0 0 0 0 rgba(34, 197, 94, 0.3); }
+            70% { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06), inset 0 0 0 4px #ffffff, 0 0 0 20px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06), inset 0 0 0 4px #ffffff, 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .avatar-ring.speaking {
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        .avatar-ring.listening {
+            animation: pulse-ring-listen 1.5s infinite;
+        }
+
+        .status-section {
+            text-align: center;
+            margin-top: 35px;
+        }
+
+        .status {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-accent);
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+
+        .status.ended {
+            color: var(--danger-red);
+        }
+
+        /* INLINE PANELS (MENU & SUMMARY) */
+        .inline-panel {
+            width: 100%;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+            color: var(--text-dark);
+            text-align: left;
+        }
+
+        .inline-panel h3 {
+            color: var(--text-accent);
+            margin-bottom: 16px;
+            font-size: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .inline-panel p {
+            font-size: 12px;
+            margin-bottom: 10px;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .summary-text {
+            font-size: 12px;
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-line;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        /* BOTTOM SECTION */
+        .bottom-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .footer-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-call {
+            width: 220px;
+            height: 52px;
+            border-radius: 26px;
+            background-color: var(--text-dark);
+            color: white;
+            border: none;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-call:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-call:active {
+            transform: translateY(0);
+        }
+
+        .btn-call.stop {
+            background-color: var(--danger-red);
+        }
+
+        .brand-text {
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--text-light);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 25px;
+        }
+
+        .transcript-overlay {
+            position: absolute;
+            bottom: 140px;
+            left: 30px;
+            right: 30px;
+            text-align: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .transcript-text {
+            font-size: 13px;
+            color: var(--text-dark);
+            font-style: italic;
+            background: rgba(255,255,255,0.95);
+            padding: 10px 16px;
+            border-radius: 16px;
+            display: inline-block;
+            max-width: 90%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .transcript-text.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        
+        <div class="top-section">
+            <div class="logo-section">
+                <img src="logo.png" alt="Logo Punto Blanco" onerror="this.style.display='none'">
+                <span id="logo-placeholder" style="display:none; font-weight: bold; color: #161616;">Logo Punto Blanco</span>
+            </div>
+        </div>
+
+        <div class="middle-section">
+            <!-- VISTA 1: AVATAR MÓNICA -->
+            <div id="view-avatar" class="view-container active">
+                <div class="avatar-section">
+                    <div class="avatar-glow">
+                        <div class="avatar-ring" id="avatar-ring">
+                            <div class="avatar-inner">
+                                <img src="avatar.png" alt="Mónica Avatar" onerror="this.src='https://ui-avatars.com/api/?name=Monica&background=f4f5f7&color=161616'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-section">
+                    <p id="status" class="status">Lista para atenderte</p>
+                </div>
+            </div>
+
+            <!-- VISTA 2: MENÚ -->
+            <div id="view-menu" class="view-container">
+                <div class="inline-panel">
+                    <h3>🍽️ Nuestro Menú</h3>
+                    <p><strong>Para Picar:</strong> Croquetas, Ensaladilla, Tortilla, Bravas.</p>
+                    <p><strong>Platos:</strong> Paella, Milanesa, Carne Guisada, Pasta, Calamares.</p>
+                    <p><strong>Bocadillos:</strong> Hamburguesa, Jamón, Lomo, Sandwich.</p>
+                    <p><strong>Postres/Café:</strong> Tarta Choco, Zanahoria, Latte, Capuchino.</p>
+                </div>
+            </div>
+
+            <!-- VISTA 3: RESUMEN ORDEN -->
+            <div id="view-summary" class="view-container">
+                <div class="inline-panel">
+                    <h3>✅ Confirmar Orden</h3>
+                    <div id="summary-content" class="summary-text">
+                        Cargando detalles...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="transcript-overlay">
+            <div id="transcript" class="transcript-text"></div>
+        </div>
+
+        <div class="bottom-section">
+            <div class="footer-section">
+                <button id="call-btn" class="btn-call">Tomar Orden</button>
+                <p class="brand-text">Punto Blanco</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Imagen de logo fallback
+        const logoImg = document.querySelector('.logo-section img');
+        logoImg.onload = () => {};
+        logoImg.onerror = () => {
+            logoImg.style.display = 'none';
+            document.getElementById('logo-placeholder').style.display = 'block';
+        };
+
+        const callBtn = document.getElementById('call-btn');
+        const statusText = document.getElementById('status');
+        const transcriptText = document.getElementById('transcript');
+        const avatarRing = document.getElementById('avatar-ring');
+        
+        // Vistas
+        const viewAvatar = document.getElementById('view-avatar');
+        const viewMenu = document.getElementById('view-menu');
+        const viewSummary = document.getElementById('view-summary');
+        const summaryContent = document.getElementById('summary-content');
+
+        let chatHistory = [];
+        let recognition;
+        let isActive = false;
+        let sttTimeout; // Timeout para evitar que se quede pegado escuchando
+
+        // Funciones de Transición de Vistas
+        function showView(viewElement) {
+            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+            viewElement.classList.add('active');
+        }
+
+        // Configurar Voz (TTS)
+        const synth = window.speechSynthesis;
+        let monicaVoice = null;
+
+        function loadVoices() {
+            const voices = synth.getVoices();
+            // Buscar voz de España de alta calidad, si no existe buscar cualquier española
+            monicaVoice = voices.find(v => v.lang.includes('es-ES') && v.name.includes('Google')) || 
+                         voices.find(v => v.lang.includes('es')) || 
+                         voices[0];
+        }
+        
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+
+        // Configurar Reconocimiento (STT)
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'es-ES';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                avatarRing.classList.add('listening');
+                statusText.innerText = "ESCUCHANDO...";
+                statusText.className = "status active";
+                
+                // Evitar que se quede "pegado" escuchando
+                clearTimeout(sttTimeout);
+                sttTimeout = setTimeout(() => {
+                    if (avatarRing.classList.contains('listening')) {
+                        console.log("Forzando parada de reconocimiento por inactividad");
+                        try { recognition.stop(); } catch(e) {}
+                    }
+                }, 7000); // 7 segundos de espera máxima sin hablar
+            };
+
+            recognition.onresult = async (event) => {
+                clearTimeout(sttTimeout);
+                const text = event.results[0][0].transcript;
+                showTranscript(`"${text}"`);
+                avatarRing.classList.remove('listening');
+                await processInput(text);
+            };
+
+            recognition.onerror = (event) => {
+                clearTimeout(sttTimeout);
+                console.error("Error STT:", event.error);
+                avatarRing.classList.remove('listening');
+                if (isActive) {
+                    // Si falla silenciosamente, reiniciar después de un momento
+                    setTimeout(() => {
+                        try { recognition.start(); } catch(e) {}
+                    }, 500);
+                }
+            };
+
+            recognition.onend = () => {
+                clearTimeout(sttTimeout);
+                avatarRing.classList.remove('listening');
+                // Si la llamada sigue activa pero no estamos hablando, restaurar texto
+                if(isActive && !synth.speaking && statusText.innerText === "ESCUCHANDO...") {
+                    statusText.innerText = "PENSANDO...";
+                }
+            };
+        }
+
+        function showTranscript(text) {
+            transcriptText.innerText = text;
+            transcriptText.classList.add('visible');
+            setTimeout(() => {
+                transcriptText.classList.remove('visible');
+            }, 3000);
+        }
+
+        // Parseo de resumen para inyectarlo en el HTML
+        function extractSummaryText(text) {
+            const lines = text.split('\n');
+            let summaryHTML = "";
+            let isSummaryArea = false;
+            
+            for(let line of lines) {
+                if(line.includes("Cliente:") || line.includes("Dirección") || line.includes("Productos:") || line.includes("Total:")) {
+                    isSummaryArea = true;
+                }
+                if(isSummaryArea && line.trim() !== "") {
+                    // Evitar incluir los JSON tags en el texto
+                    if(!line.includes("{")) {
+                        summaryHTML += `<strong>${line.split(':')[0]}:</strong> ${line.substring(line.indexOf(':')+1)}<br/>`;
+                    }
+                }
+            }
+            if(summaryHTML === "") {
+                summaryHTML = "Por favor, confirma que la orden y tus datos son correctos.";
+            }
+            return summaryHTML;
+        }
+
+        async function speak(text) {
+            return new Promise((resolve) => {
+                // Limpiar etiquetas para no leerlas en voz alta
+                let cleanText = text.replace(/\[SHOW_MENU\]/gi, '')
+                                    .replace(/\[HIDE_MENU\]/gi, '')
+                                    .replace(/\[SHOW_SUMMARY\]/gi, '')
+                                    .replace(/\[HANG_UP\]/gi, '')
+                                    .replace(/\{.*\}/g, '')
+                                    .trim();
+                
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.voice = monicaVoice;
+                utterance.rate = 1.15; // Un poco más rápido para no sonar robótica
+                utterance.pitch = 1.1;
+
+                utterance.onstart = () => {
+                    avatarRing.classList.add('speaking');
+                    statusText.innerText = "MÓNICA HABLANDO...";
+                    statusText.className = "status active";
+                };
+
+                utterance.onend = () => {
+                    avatarRing.classList.remove('speaking');
+                    resolve();
+                };
+
+                synth.speak(utterance);
+            });
+        }
+
+        async function processInput(message) {
+            statusText.innerText = "PENSANDO...";
+            try {
+                const response = await fetch('/.netlify/functions/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, history: chatHistory })
+                });
+
+                if (!response.ok) throw new Error("Error en el servidor");
+
+                const data = await response.json();
+                const monicaResponse = data.response;
+
+                chatHistory.push({ role: "user", content: message });
+                chatHistory.push({ role: "assistant", content: monicaResponse });
+
+                // Manejo de eventos de la interfaz
+                if (monicaResponse.includes('[SHOW_MENU]')) {
+                    showView(viewMenu);
+                } 
+                else if (monicaResponse.includes('[HIDE_MENU]')) {
+                    showView(viewAvatar);
+                }
+                else if (monicaResponse.includes('[SHOW_SUMMARY]')) {
+                    summaryContent.innerHTML = extractSummaryText(monicaResponse);
+                    showView(viewSummary);
+                }
+
+                await speak(monicaResponse);
+                
+                // Cerrar si mando señal de hang_up
+                if (monicaResponse.includes('[HANG_UP]')) {
+                    setTimeout(stopCall, 2000);
+                    return;
+                }
+                
+                if (isActive) {
+                    try { recognition.start(); } catch(e) {}
+                }
+
+            } catch (error) {
+                console.error("Error Chat:", error);
+                statusText.innerText = `ERROR: ${error.message}`;
+                statusText.className = "status ended";
+                await speak("Lo siento, hubo un error de conexión.");
+                if (isActive) {
+                    setTimeout(() => {
+                        try { recognition.start(); } catch(e) {}
+                    }, 2000);
+                }
+            }
+        }
+
+        async function startCall() {
+            if (!SpeechRecognition) {
+                alert("Tu navegador no soporta reconocimiento de voz. Te recomendamos usar Google Chrome.");
+                return;
+            }
+
+            isActive = true;
+            callBtn.innerText = "FINALIZAR LLAMADA";
+            callBtn.classList.add('stop');
+            statusText.innerText = "CONECTANDO...";
+            statusText.className = "status active";
+            
+            chatHistory = [];
+            showView(viewAvatar); // Asegurar que empezamos con el avatar
+            
+            const greeting = "¡Hola mi amor! Bienvenido a Punto Blanco. Soy Mónica. ¿Con quién tengo el gusto de hablar?";
+            await speak(greeting);
+            chatHistory.push({ role: "assistant", content: greeting });
+            
+            try { recognition.start(); } catch(e) {}
+        }
+
+        function stopCall() {
+            isActive = false;
+            synth.cancel();
+            if (recognition) recognition.stop();
+            clearTimeout(sttTimeout);
+            
+            callBtn.innerText = "TOMAR ORDEN";
+            callBtn.classList.remove('stop');
+            statusText.innerText = "LISTA PARA ATENDERTE";
+            statusText.className = "status active";
+            showView(viewAvatar); // Resetear a la vista principal
+        }
+
+        callBtn.onclick = () => {
+            if (isActive) stopCall();
+            else startCall();
+        };
+    </script>
+</body>
+</html>
